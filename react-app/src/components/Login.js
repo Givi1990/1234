@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button } from 'react-bootstrap';
-import { useAuth } from '../context/AuthContext'; // Импортируйте useAuth
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth(); // Используйте login из контекста
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -16,7 +16,7 @@ const Login = () => {
       navigate('/users');
     } catch (error) {
       console.error('Error during login:', error);
-      alert('Login failed: ' + error.response?.data?.message || 'Unknown error occurred');
+      alert('Login failed: ' + (error.response?.data?.message || 'Unknown error occurred'));
     }
   };
 

@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();  // Подключение dotenv для работы с переменными окружения
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5002;
@@ -14,23 +14,18 @@ app.use(cors({
   credentials: true
 }));
 
-// Проверка наличия переменной JWT_SECRET
 if (!process.env.JWT_SECRET) {
-  console.error('JWT_SECRET is not set');
-  process.exit(1);  // Завершение работы сервера, если переменная не установлена
+  process.exit(1);
 }
 
-mongoose.connect(process.env.MONGO_URI, {
-  // Удалены устаревшие опции
-})
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('Failed to connect to MongoDB', err));
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('Failed to connect to MongoDB', err));
 
 mongoose.connection.on('error', (err) => {
   console.error('MongoDB connection error:', err);
 });
 
-// Определение схемы и модели пользователя
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   name: { type: String },
@@ -45,9 +40,6 @@ userSchema.index({ email: 1 }, { unique: true });
 
 const User = mongoose.model('User', userSchema);
 
-
-
-// Middleware для проверки токенов
 const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -77,17 +69,10 @@ const authenticateToken = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
-    console.error('Token verification error:', err);
     res.sendStatus(403);
   }
 };
 
-app.use((req, res, next) => {
-  console.log(`Received request: ${req.method} ${req.url}`);
-  next();
-});
-
-// Регистрация пользователя
 app.post('/api/register', async (req, res) => {
   const { email, password, name } = req.body;
 
@@ -107,12 +92,10 @@ app.post('/api/register', async (req, res) => {
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
-    console.error('Error during registration:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 
-// Логин пользователя
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -146,27 +129,31 @@ app.post('/api/login', async (req, res) => {
 
     res.status(200).json({ message: 'Login successful', token });
   } catch (error) {
-    console.error('Error during login:', error.message);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
-  }
-});
-
-// Получение всех пользователей
-app.get('/api/user', authenticateToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id); // Используем идентификатор из `req.user`, а не из `req.user.email`
-    if (!user) return res.sendStatus(404);
-    res.json(user);
-  } catch (error) {
-    console.error('Error fetching user:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 
+app.get('/api/users', authenticateToken, async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
+app.get('/api/users/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
-
-// Блокировка пользователей
 app.post('/api/users/block', authenticateToken, async (req, res) => {
   const { userIds } = req.body;
 
@@ -178,12 +165,10 @@ app.post('/api/users/block', authenticateToken, async (req, res) => {
     });
     res.status(200).json({ message: 'Users blocked successfully' });
   } catch (error) {
-    console.error('Error blocking users:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 
-// Разблокировка пользователей
 app.post('/api/users/unblock', authenticateToken, async (req, res) => {
   const { userIds } = req.body;
 
@@ -191,26 +176,20 @@ app.post('/api/users/unblock', authenticateToken, async (req, res) => {
     await User.updateMany({ _id: { $in: userIds } }, { $set: { status: 'active' } });
     res.status(200).json({ message: 'Users unblocked successfully' });
   } catch (error) {
-    console.error('Error unblocking users:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 
-// Удаление пользователей
 app.post('/api/users/delete', authenticateToken, async (req, res) => {
   const { userIds } = req.body;
-  console.log('Deleting users with IDs:', userIds);
   try {
     await User.deleteMany({ _id: { $in: userIds } });
-    console.log('Users deleted successfully');
     res.status(200).json({ message: 'Users deleted successfully' });
   } catch (error) {
-    console.error('Error deleting users:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 
-// Запуск сервера
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

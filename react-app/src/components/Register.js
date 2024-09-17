@@ -7,8 +7,8 @@ const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [registrationDate] = useState(new Date().toISOString()); // Устанавливаем текущую дату регистрации
-  const [lastLoginDate] = useState(new Date().toISOString()); // Последний вход тоже текущая дата при регистрации
+  const [registrationDate] = useState(new Date().toISOString());
+  const [lastLoginDate] = useState(new Date().toISOString());
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
@@ -25,7 +25,7 @@ const Register = () => {
       navigate('/login');
     } catch (error) {
       console.error('Error during registration:', error);
-      alert('Registration failed: ' + error.response?.data?.message || 'Unknown error occurred');
+      alert('Registration failed: ' + (error.response?.data?.message || 'Unknown error occurred'));
     }
   };
 

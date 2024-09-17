@@ -16,12 +16,9 @@ const UserTable = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       if (!auth || !auth.token) return;
-
       try {
         const response = await axios.get('http://localhost:5002/api/users', {
-          headers: {
-            Authorization: `Bearer ${auth.token}`
-          }
+          headers: { Authorization: `Bearer ${auth.token}` },
         });
         setUsers(response.data);
       } catch (error) {
@@ -31,7 +28,6 @@ const UserTable = () => {
         }
       }
     };
-
     fetchUsers();
   }, [auth, logout, navigate]);
 
@@ -46,74 +42,45 @@ const UserTable = () => {
   const handleSelectUser = (userId) => {
     setSelectedUsers(prev => {
       const newSelected = new Set(prev);
-      if (newSelected.has(userId)) {
-        newSelected.delete(userId);
-      } else {
-        newSelected.add(userId);
-      }
+      if (newSelected.has(userId)) newSelected.delete(userId);
+      else newSelected.add(userId);
       return newSelected;
     });
   };
 
   const handleAction = async (action) => {
-    if (!auth || !auth.token || selectedUsers.size === 0) {
-      console.log('auth или token не определен, либо нет выбранных пользователей');
-      return;
-    }
+    if (!auth || !auth.token || selectedUsers.size === 0) return;
 
     try {
       const selectedUserIds = Array.from(selectedUsers);
-
-      // Проверка, если пользователь выбирает сам себя
       if (auth.user && selectedUserIds.includes(auth.user._id)) {
-        console.log(`Пользователь выполняет действие (${action}) сам для себя`);
-
-        // Выполнение действия для самого себя
         await axios.post(`http://localhost:5002/api/users/${action}`, {
-          userIds: selectedUserIds
+          userIds: selectedUserIds,
         }, {
-          headers: {
-            Authorization: `Bearer ${auth.token}`
-          }
+          headers: { Authorization: `Bearer ${auth.token}` },
         });
-
-        // Удаление токена и перенаправление на страницу логина
         await logout();
         navigate('/login');
-
         return;
       }
 
-      // Выполнение действий для других пользователей
-      console.log('Выполнение действия для других пользователей');
-
       await axios.post(`http://localhost:5002/api/users/${action}`, {
-        userIds: selectedUserIds
+        userIds: selectedUserIds,
       }, {
-        headers: {
-          Authorization: `Bearer ${auth.token}`
-        }
+        headers: { Authorization: `Bearer ${auth.token}` },
       });
 
-      // Получение обновленного списка пользователей
       const updatedResponse = await axios.get('http://localhost:5002/api/users', {
-        headers: {
-          Authorization: `Bearer ${auth.token}`
-        }
+        headers: { Authorization: `Bearer ${auth.token}` },
       });
-
-      console.log('Ответ сервера при обновлении пользователей:', updatedResponse);
 
       if (updatedResponse && updatedResponse.status === 200) {
         setUsers(updatedResponse.data);
         setSelectedUsers(new Set());
         toast.success(`Users ${action}ed successfully`);
-      } else {
-        console.error('Ошибка при обновлении списка пользователей.');
       }
     } catch (error) {
-      console.error('Ошибка выполнения действия:', error);
-      toast.error('Ошибка выполнения действия');
+      toast.error('Error performing action');
     }
   };
 
@@ -158,7 +125,13 @@ const UserTable = () => {
         <tbody>
           {users.map(user => (
             <tr key={user._id}>
-              <td><Form.Check type="checkbox" checked={selectedUsers.has(user._id)} onChange={() => handleSelectUser(user._id)} /></td>
+              <td>
+                <Form.Check
+                  type="checkbox"
+                  checked={selectedUsers.has(user._id)}
+                  onChange={() => handleSelectUser(user._id)}
+                />
+              </td>
               <td>{user._id}</td>
               <td>{user.name}</td>
               <td>{user.email}</td>
