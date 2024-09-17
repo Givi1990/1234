@@ -1,0 +1,3 @@
+[submodule "react-app"]
+  path = react-app
+  url = https://github.com/Givi1990/task-4.git
