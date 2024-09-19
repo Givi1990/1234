@@ -20,9 +20,9 @@
     "jwt-decode": "^4.0.0",
     "mongodb": "^6.9.0",
     "mongoose": "^8.6.2",
-    "react-toastify": "^10.0.5",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "react-toastify": "^10.0.5"
   },
   "devDependencies": {
     "react-scripts": "^5.0.1"

@@ -11,6 +11,8 @@ const Register = () => {
   const [lastLoginDate] = useState(new Date().toISOString());
   const navigate = useNavigate();
 
+  
+
   const handleRegister = async (e) => {
     e.preventDefault();
     try {

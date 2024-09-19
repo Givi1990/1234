@@ -4,6 +4,9 @@ import { jwtDecode } from 'jwt-decode'; // Updated import
 
 const AuthContext = createContext();
 
+const api = "http://localhost:5002/api";
+// const api = "https://cadd-93-177-143-13.ngrok-free.app"
+
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({ token: null, user: null });
 
@@ -21,11 +24,13 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async (token) => {
     try {
-      const response = await axios.get('http://localhost:5002/api/users', {
+      const response = await axios.get(`${api}/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
+      
       const users = response.data;
+      console.log(users);
+      
       const userId = jwtDecode(token).id;
       const currentUser = users.find(user => user._id === userId);
 
@@ -42,7 +47,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:5002/api/login', { email, password });
+      const response = await axios.post(`${api}/login`, { email, password });
       const { token } = response.data;
       localStorage.setItem('token', token);
       const user = await fetchUser(token);

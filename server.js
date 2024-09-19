@@ -73,7 +73,7 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-app.post('/api/register', async (req, res) => {
+app.post('/register', async (req, res) => {
   const { email, password, name } = req.body;
 
   if (!email || !password) {
@@ -96,7 +96,7 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-app.post('/api/login', async (req, res) => {
+app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -133,7 +133,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-app.get('/api/users', authenticateToken, async (req, res) => {
+app.get('/users', authenticateToken, async (req, res) => {
   try {
     const users = await User.find({});
     res.json(users);
@@ -142,7 +142,7 @@ app.get('/api/users', authenticateToken, async (req, res) => {
   }
 });
 
-app.get('/api/users/:id', async (req, res) => {
+app.get('/users/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -154,7 +154,7 @@ app.get('/api/users/:id', async (req, res) => {
   }
 });
 
-app.post('/api/users/block', authenticateToken, async (req, res) => {
+app.post('/users/block', authenticateToken, async (req, res) => {
   const { userIds } = req.body;
 
   try {
@@ -169,7 +169,7 @@ app.post('/api/users/block', authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/api/users/unblock', authenticateToken, async (req, res) => {
+app.post('/users/unblock', authenticateToken, async (req, res) => {
   const { userIds } = req.body;
 
   try {
@@ -180,7 +180,7 @@ app.post('/api/users/unblock', authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/api/users/delete', authenticateToken, async (req, res) => {
+app.post('/users/delete', authenticateToken, async (req, res) => {
   const { userIds } = req.body;
   try {
     await User.deleteMany({ _id: { $in: userIds } });
